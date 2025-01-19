@@ -141,6 +141,7 @@ exports.getConnections = async (req, res) => {
             
             // Get direct connections
             OPTIONAL MATCH (mainUser)-[r:CONNECTED_TO]-(directConn:User)
+                        WITH mainUser, r, directConn  LIMIT 10
             
             // Return main user and direct connections, including their Neo4j internal IDs
             RETURN 
