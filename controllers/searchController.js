@@ -182,14 +182,15 @@ exports.path_ranking = async (req, res) => {
     try {
         const result = await session.run(
             `
-            MATCH (source:User {email: $sourceEmail}), (target:User {email: $targetEmail})
-            CALL apoc.algo.allSimplePaths(source, target, 'CONNECTED_TO', 5)
-            YIELD path
-            RETURN 
-                [node IN nodes(path) | {id: id(node), properties: properties(node)}] AS intermediateNodes,
-                reduce(total = 0, r IN relationships(path) | total + COALESCE(r.strength, 1)) AS pathStrength,
-                [r IN relationships(path) | COALESCE(r.strength, 1)] AS edgeStrengths
-            ORDER BY pathStrength ASC
+           MATCH (source:User {email: $sourceEmail}), (target:User {email: $targetEmail})
+CALL apoc.algo.allSimplePaths(source, target, 'CONNECTED_TO', 3)
+YIELD path
+RETURN 
+    [node IN nodes(path) | {id: id(node), properties: properties(node)}] AS intermediateNodes,
+    reduce(total = 0, r IN relationships(path) | total + COALESCE(r.strength, 1)) AS pathStrength,
+    [r IN relationships(path) | COALESCE(r.strength, 1)] AS edgeStrengths,
+    length(path) AS pathLength
+ORDER BY pathLength ASC
             `,
             { sourceEmail, targetEmail }
         );

@@ -158,10 +158,10 @@ exports.getConnections = async (req, res) => {
 
         // If user doesn't exist
         if (result.records.length === 0) {
-            return res.status(404).json({ 
+            return res.status(404).json({  
                 message: 'User not found' 
             });
-        }
+        }  
 
         const record = result.records[0];
         const mainUser = record.get('mainUser').properties;
