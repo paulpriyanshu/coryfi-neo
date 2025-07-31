@@ -210,7 +210,7 @@ exports.path_ranking = async (req, res) => {
         const result = await session.run(
             `
            MATCH (source:User {email: $sourceEmail}), (target:User {email: $targetEmail})
-CALL apoc.algo.allSimplePaths(source, target, 'CONNECTED_TO', 6)
+CALL apoc.algo.allSimplePaths(source, target, 'CONNECTED_TO', 5)
 YIELD path
 RETURN 
     [node IN nodes(path) | {id: id(node), properties: properties(node)}] AS intermediateNodes,
