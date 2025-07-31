@@ -70,7 +70,7 @@ exports.searchReachableNodes = async function (req,res) {
     MATCH (source:User {email: $sourceEmail}), (target:User)
     WHERE source <> target
       AND NOT (source)-[:CONNECTED_TO]-(target)
-    CALL apoc.algo.allSimplePaths(source, target, 'CONNECTED_TO', 4)
+    CALL apoc.algo.allSimplePaths(source, target, 'CONNECTED_TO', 5)
     YIELD path
     WHERE length(path) >= 2 AND length(path) <= 4
     RETURN DISTINCT target.email AS reachableEmail 
@@ -210,7 +210,7 @@ exports.path_ranking = async (req, res) => {
         const result = await session.run(
             `
            MATCH (source:User {email: $sourceEmail}), (target:User {email: $targetEmail})
-CALL apoc.algo.allSimplePaths(source, target, 'CONNECTED_TO', 5)
+CALL apoc.algo.allSimplePaths(source, target, 'CONNECTED_TO', 4)
 YIELD path
 RETURN 
     [node IN nodes(path) | {id: id(node), properties: properties(node)}] AS intermediateNodes,
