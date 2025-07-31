@@ -61,6 +61,33 @@ exports.search = async (req, res) => {
     }
 };
 
+exports.searchReachableNodes = async function (req,res) {
+    const driver = req.app.locals.driver;
+  const session = driver.session();
+  const { sourceEmail} = req.body;
+
+  const query = `
+    MATCH (source:User {email: $sourceEmail}), (target:User)
+    WHERE source <> target
+      AND NOT (source)-[:CONNECTED_TO]-(target)
+    CALL apoc.algo.allSimplePaths(source, target, 'CONNECTED_TO', 5)
+    YIELD path
+    WHERE length(path) >= 2 AND length(path) <= 4
+    RETURN DISTINCT target.email AS reachableEmail 
+  `;
+
+  try {
+    const result = await session.run(query, { sourceEmail });
+    const emails = result.records.map(record => record.get('reachableEmail'));
+    res.status(200).json(emails)
+  } catch (err) {
+    console.error('Neo4j query failed:', err);
+    throw err;
+  } finally {
+    await session.close();
+  }
+};
+
 exports.connect_to_user = async (req, res) => {
     const driver = req.app.locals.driver;
     const session = driver.session();
@@ -183,7 +210,7 @@ exports.path_ranking = async (req, res) => {
         const result = await session.run(
             `
            MATCH (source:User {email: $sourceEmail}), (target:User {email: $targetEmail})
-CALL apoc.algo.allSimplePaths(source, target, 'CONNECTED_TO', 4)
+CALL apoc.algo.allSimplePaths(source, target, 'CONNECTED_TO', 8)
 YIELD path
 RETURN 
     [node IN nodes(path) | {id: id(node), properties: properties(node)}] AS intermediateNodes,

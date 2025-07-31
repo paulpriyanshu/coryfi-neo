@@ -16,6 +16,7 @@ router.post('/connect',userController.createRelationship)
 router.post('/search',searchController.search)
 router.post('/connectToUser',searchController.connect_to_user)
 router.post('/getpathranking',searchController.path_ranking)
+router.post('/searchReachableNodes',searchController.searchReachableNodes)
 
 router.post('/getAllPath',searchController.get_all_paths)
 
