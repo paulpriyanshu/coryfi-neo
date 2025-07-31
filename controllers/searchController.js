@@ -70,7 +70,7 @@ exports.searchReachableNodes = async function (req,res) {
     MATCH (source:User {email: $sourceEmail}), (target:User)
     WHERE source <> target
       AND NOT (source)-[:CONNECTED_TO]-(target)
-    CALL apoc.algo.allSimplePaths(source, target, 'CONNECTED_TO', 5)
+    CALL apoc.algo.allSimplePaths(source, target, 'CONNECTED_TO', 4)
     YIELD path
     WHERE length(path) >= 2 AND length(path) <= 4
     RETURN DISTINCT target.email AS reachableEmail 
