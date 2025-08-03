@@ -196,7 +196,7 @@ exports.connect_to_user = async (req, res) => {
         await session.close();
     }
 };
- 
+  
 exports.path_ranking = async (req, res) => {
     const driver = req.app.locals.driver;
     const session = driver.session();
@@ -292,7 +292,7 @@ ORDER BY pathLength ASC
         });
 
         // Return the specific path or all paths
-        if (pathIndex !== undefined) {
+        if (pathIndex !== undefined && pathIndex !== null) {
             const selectedPath = paths[pathIndex];
             if (!selectedPath) {
                 return res.status(404).json({
