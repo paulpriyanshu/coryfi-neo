@@ -219,7 +219,7 @@ RETURN
     [r IN relationships(path) | COALESCE(r.strength, 1)] AS edgeStrengths,
     length(path) AS pathLength
 ORDER BY pathLength ASC
-LIMIT 50
+LIMIT 200
             `,
             { sourceEmail, targetEmail }
         );
