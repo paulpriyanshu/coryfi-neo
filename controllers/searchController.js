@@ -1,3 +1,4 @@
+const neo4j = require('neo4j-driver');
 exports.search = async (req, res) => {
     const driver = req.app.locals.driver;
     const session = driver.session();
@@ -218,6 +219,7 @@ RETURN
     [r IN relationships(path) | COALESCE(r.strength, 1)] AS edgeStrengths,
     length(path) AS pathLength
 ORDER BY pathLength ASC
+LIMIT 50
             `,
             { sourceEmail, targetEmail }
         );
@@ -412,6 +414,77 @@ exports.get_all_paths = async (req, res) => {
         await session.close();
     }
 };
+
+
+
+
+
+
+
+// controllers/searchController.js
+// const neo4j = require('neo4j-driver');
+
+exports.getRandomPathsForUsers = async (req, res) => {
+  const driver = req.app.locals.driver;
+  const session = driver.session();
+  const limit = 200;
+
+  console.log("hello");
+
+  // Helper to convert Neo4j types to plain JS
+  function convertNeo4jProps(props) {
+    const result = {};
+    for (const key in props) {
+      const value = props[key];
+      if (neo4j.isInt(value)) {
+        result[key] = value.toNumber();
+      } else if (
+        value &&
+        typeof value === 'object' &&
+        ('hour' in value || 'minute' in value || 'second' in value)
+      ) {
+        result[key] = value.toString(); // converts time/date objects to string
+      } else {
+        result[key] = value;
+      }
+    }
+    return result;
+  }
+
+  try {
+    const query = `
+      MATCH path = (start:User)-[*2..4]-(end:User)
+      WHERE id(start) < id(end)
+        AND NOT (start)--(end)
+      WITH start, end, rand() AS r
+      ORDER BY r
+      LIMIT $limit
+      RETURN start, end
+    `;
+
+    const result = await session.run(query, { limit: neo4j.int(limit) });
+    console.log("result", result);
+
+    const paths = result.records.map(record => ({
+      start: convertNeo4jProps(record.get('start').properties),
+      end: convertNeo4jProps(record.get('end').properties)
+    }));
+
+    res.status(200).json({
+      success: true,
+      data: paths
+    });
+  } catch (error) {
+    console.error('Error fetching random paths:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  } finally {
+    await session.close();
+  }
+};
+
 exports.userProfile = async (req, res) => {
     const { id } = req.params
   
